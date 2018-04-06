@@ -113,7 +113,7 @@ public class Transfer extends JFrame {
 						tips.setText("成功转账0元！");
 					}
 					else {
-						String writeTo = account+' '+amt;
+						String writeTo = "transfer\n" + account + '\n'+amt + '\n';
 						String answer = send(socket,writeTo);
 						if(answer.equals("0")) {
 							tips.setText("");

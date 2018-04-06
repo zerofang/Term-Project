@@ -89,7 +89,8 @@ public class Withdraw extends JFrame {
 				}
 				else {
 					try {
-						String answer = send(socket,amts);
+						String writeTo = "withdraw\n" + amts + '\n';
+						String answer = send(socket,writeTo);
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

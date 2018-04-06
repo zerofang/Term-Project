@@ -100,14 +100,14 @@ public class Login {
 						tips.setText("卡号或密码格式不正确！");
 					}
 					else {
-						String writeTo = userAccount+' '+userPSW;
+						String writeTo = "login\n" + userAccount + '\n' + userPSW+'\n';
 						String answer = send(socket,writeTo);
 						if(answer.equals("0")) {
 							tips.setText("");
 							new Service(socket);
 							frmAtm.dispose();
 						}
-						else if(answer.equals("1")){
+						else if(answer.equals("pswdError")){
 							tips.setText("密码错误！");
 						}
 						else {
