@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 public class Login {
 
@@ -46,13 +47,23 @@ public class Login {
 	 * Create the application.
 	 */
 	public Login() {
-		initialize();
+		Socket socket = null;
+		try {
+			socket = new Socket("127.0.0.1",8888);
+			initialize(socket);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
+	private void initialize(Socket socket) {
 		frmAtm = new JFrame();
 		frmAtm.setTitle("ATM-\u767B\u5F55");
 		frmAtm.setBounds(100, 100, 450, 300);
@@ -90,8 +101,6 @@ public class Login {
 		login.setFont(new Font("微软雅黑", Font.PLAIN, 13));
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				try {
-					Socket socket = new Socket("127.0.0.1",8888);
 					String userAccount = account.getText();
 					String userPSW = password.getText();
 					userAccount.trim();
@@ -101,22 +110,26 @@ public class Login {
 					}
 					else {
 						String writeTo = "login\n" + userAccount + '\n' + userPSW+'\n';
-						String answer = send(socket,writeTo);
-						if(answer.equals("0")) {
-							tips.setText("");
-							new Service(socket);
-							frmAtm.dispose();
-						}
-						else if(answer.equals("pswdError")){
-							tips.setText("密码错误！");
-						}
-						else {
-							tips.setText("账户不存在！");
+						String answer;
+						try {
+							answer = send(socket,writeTo);
+							System.out.println(answer);
+							if(answer.equals("notFound\n")) {
+								tips.setText("账户不存在！");
+							}
+							else if(answer.equals("pswdError\n")){
+								tips.setText("密码错误！");
+							}
+							else {
+								tips.setText("成功！");
+								new Service(socket);
+								//frmAtm.setVisible(false);							
+							}
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
 					}
-				} catch (Exception e) {
-					tips.setText("连接服务器失败！");
-				}
 			}
 		});
 		login.setBounds(106, 197, 204, 23);

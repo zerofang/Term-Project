@@ -91,6 +91,12 @@ public class Withdraw extends JFrame {
 					try {
 						String writeTo = "withdraw\n" + amts + '\n';
 						String answer = send(socket,writeTo);
+						if(answer.equals("success\n")) {
+							tips.setText("成功存入！");
+						}
+						else if(answer.equals("insufficient\n")) {
+							tips.setText("余额不足！");
+						}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

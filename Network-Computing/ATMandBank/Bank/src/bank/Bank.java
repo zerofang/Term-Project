@@ -31,47 +31,69 @@ public class Bank {
             while(true)   
             {  
                 Socket socket = ss.accept();  
-                  
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));  
-    			BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-                String line = in.readLine();  
+
+                String line = read(socket);  
                 if(line.equals("login")) {
-                	String account = in.readLine();
+                	String account = read(socket);
                 	ResultSet rs = s.executeQuery("SELECT * FROM users WHERE account = "+account);
-                	String pswd = in.readLine();
-                	if(pswd.equals(rs.getString(3))) {
-                		String service = in.readLine();
-                		if(service.equals("diposit")) {
-                			int amount = Integer.parseInt(in.readLine());
-                			int oamt = rs.getInt(4);
-                			oamt += amount;
-                			s.executeQuery("UPDATE users SET amount = " + oamt);
-                		}
-                		else if(service.equals("withdraw")) {
-                			int amount = Integer.parseInt(in.readLine());
-                			int oamt = rs.getInt(4);
-                			if(oamt>=amount) {
-                				oamt -= amount;
-                				s.executeQuery("UPDATE users SET amount = " + oamt);
-                			}
-                			else {
-                				
-                			}
-                		}
-                		else if(service.equals("transfer")) {
-                			String toAccount = in.readLine();
-                			String amount = in.readLine();
-                		}
+                	if(rs.next()){
+                    	String pswd = read(socket);
+                    	if(pswd.equals(rs.getString(3))) {
+                    		send(socket,"success"); 
+							System.out.println("8888");
+                    		String service = read(socket);
+                    		if(service.equals("diposit")) {
+                    			int amount = Integer.parseInt(read(socket));
+                    			int oamt = rs.getInt(4);
+                    			oamt += amount;
+                    			s.executeQuery("UPDATE users SET amount = " + oamt + "WHERE account =" + account);
+                    			send(socket,"success"); 
+                    		}
+                    		else if(service.equals("withdraw")) {
+                    			int amount = Integer.parseInt(read(socket));
+                    			int oamt = rs.getInt(4);
+                    			if(oamt>=amount) {
+                    				oamt -= amount;
+                    				s.executeQuery("UPDATE users SET amount = " + oamt + "WHERE account =" + account);
+                    				send(socket,"success");                   				
+                    			}
+                    			else {
+                            		send(socket,"insufficient"); 
+                    			}
+                    		}
+                    		else if(service.equals("transfer")) {
+                    			String toAccount = read(socket); 
+                    			int amount = Integer.parseInt(read(socket));
+                    			ResultSet toAcnt = s.executeQuery("SELECT * FROM users WHERE account = "+toAccount);
+                    			if(toAcnt.next()) {
+                    				int tamt = toAcnt.getInt(4);
+                    				int oamt = rs.getInt(4);
+                    				if(oamt>=amount) {
+                    					oamt -= amount;
+                    					tamt += amount;
+                    					s.executeQuery("UPDATE users SET amount = " + oamt + "WHERE account =" + account);
+                    					s.executeQuery("UPDATE users SET amount = " + tamt + "WHERE account =" + toAccount);
+                    					send(socket,"success");    
+                    				}
+                    				else {
+                    					send(socket,"insufficient");                     					
+                    				}
+                    			}
+                    			else {
+                    				send(socket,"notFound");                      				
+                    			}
+                    		}
+                    	}
+                    	else {
+                    		send(socket,"pswdError");
+                    	                		
+                    	}
                 	}
                 	else {
-                		String writeTo = "pswdError";
-                		bufferedWriter.write(writeTo);
-            			bufferedWriter.flush();
+                		send(socket,"notFound");                		
                 	}
                 }
                 //System.out.println("you input is : " + line);  
-                bufferedWriter.close();  
-                in.close();  
                 socket.close();  
             }
         } catch (IOException e) {  
@@ -80,5 +102,17 @@ public class Bank {
 	}
 	public static void main(String[] args) throws Exception{
 		Bank b = new Bank();  
+	}
+	public String read(Socket socket) throws IOException {
+		BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+		String line = in.readLine(); 
+		in.close();
+		return line;
+	}
+	public void send(Socket socket,String writeTo) throws IOException {
+		BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+		bufferedWriter.write(writeTo);
+		bufferedWriter.flush();
+		bufferedWriter.close(); 
 	}
 }

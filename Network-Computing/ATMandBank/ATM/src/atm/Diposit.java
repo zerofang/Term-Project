@@ -93,6 +93,9 @@ public class Diposit extends JFrame {
 					try {
 						String writeTo = "diposit\n" + amts + '\n';
 						String answer = send(socket,writeTo);
+						if(answer.equals("success\n")) {
+							tips.setText("≥…π¶¥Ê»Î£°");
+						}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();

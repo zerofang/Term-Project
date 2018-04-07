@@ -115,8 +115,11 @@ public class Transfer extends JFrame {
 					else {
 						String writeTo = "transfer\n" + account + '\n'+amt + '\n';
 						String answer = send(socket,writeTo);
-						if(answer.equals("0")) {
-							tips.setText("");
+						if(answer.equals("success\n")) {
+							tips.setText("成功转账！");
+						}
+						else if(answer.equals("insufficient\n")) {
+							tips.setText("余额不足！");
 						}
 						else {
 							tips.setText("账户不存在！");
