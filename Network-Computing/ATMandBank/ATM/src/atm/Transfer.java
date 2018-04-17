@@ -115,10 +115,10 @@ public class Transfer extends JFrame {
 					else {
 						String writeTo = "transfer\n" + account + '\n'+amt + '\n';
 						String answer = send(socket,writeTo);
-						if(answer.equals("success\n")) {
+						if(answer.equals("success")) {
 							tips.setText("成功转账！");
 						}
-						else if(answer.equals("insufficient\n")) {
+						else if(answer.equals("insufficient")) {
 							tips.setText("余额不足！");
 						}
 						else {
@@ -145,7 +145,7 @@ public class Transfer extends JFrame {
 			StringBuilder sb = new StringBuilder();
 			String str;
 			while ((str = bufferedReader.readLine()) != null) {
-				sb.append(str + "\n");
+				sb.append(str);
 			}
 			bufferedReader.close();
 			return sb.toString();

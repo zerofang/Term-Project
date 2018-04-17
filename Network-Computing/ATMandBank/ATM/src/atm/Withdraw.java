@@ -91,10 +91,10 @@ public class Withdraw extends JFrame {
 					try {
 						String writeTo = "withdraw\n" + amts + '\n';
 						String answer = send(socket,writeTo);
-						if(answer.equals("success\n")) {
+						if(answer.equals("success")) {
 							tips.setText("成功存入！");
 						}
-						else if(answer.equals("insufficient\n")) {
+						else if(answer.equals("insufficient")) {
 							tips.setText("余额不足！");
 						}
 					} catch (IOException e1) {
@@ -130,7 +130,7 @@ public class Withdraw extends JFrame {
 			StringBuilder sb = new StringBuilder();
 			String str;
 			while ((str = bufferedReader.readLine()) != null) {
-				sb.append(str + "\n");
+				sb.append(str);
 			}
 			bufferedReader.close();
 			return sb.toString();

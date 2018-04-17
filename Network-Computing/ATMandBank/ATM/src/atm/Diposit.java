@@ -93,7 +93,7 @@ public class Diposit extends JFrame {
 					try {
 						String writeTo = "diposit\n" + amts + '\n';
 						String answer = send(socket,writeTo);
-						if(answer.equals("success\n")) {
+						if(answer.equals("success")) {
 							tips.setText("≥…π¶¥Ê»Î£°");
 						}
 					} catch (IOException e1) {
@@ -129,7 +129,7 @@ public class Diposit extends JFrame {
 			StringBuilder sb = new StringBuilder();
 			String str;
 			while ((str = bufferedReader.readLine()) != null) {
-				sb.append(str + "\n");
+				sb.append(str);
 			}
 			bufferedReader.close();
 			return sb.toString();

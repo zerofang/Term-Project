@@ -85,7 +85,7 @@ public class Service extends JFrame {
 		JButton back = new JButton("\u8FD4\u56DE");
 		back.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				new Login();
+				new ATM();
 				dispose();
 			}
 		});
