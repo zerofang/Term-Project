@@ -117,6 +117,16 @@ public class Diposit extends JFrame {
 		back.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 13));
 		back.setBounds(35, 208, 101, 23);
 		contentPane.add(back);
+		
+		JButton DRECPT = new JButton("\u6253\u5370\u51ED\u6761");
+		DRECPT.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		DRECPT.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 13));
+		DRECPT.setEnabled(false);
+		DRECPT.setBounds(175, 208, 101, 23);
+		contentPane.add(DRECPT);
 	}
 	private String send(Socket socket, String writeTo) throws IOException {
 		try {

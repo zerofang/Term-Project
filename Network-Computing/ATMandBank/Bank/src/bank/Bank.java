@@ -12,38 +12,56 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.net.ServerSocket;  
+
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 
 public class Bank {
 
-	Connection conn;
+	static Connection conn;
 	
 	public Bank()  throws Exception {
 		Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
 		conn=DriverManager.getConnection("jdbc:ucanaccess://userInfo.accdb");
-/*		ResultSet rs = s.executeQuery("SELECT * FROM users");
-		while (rs.next()) {
-		    System.out.println(rs.getString(1));
-		}*/
         try   
         {  
-        	@SuppressWarnings("resource")
-			ServerSocket ss = new ServerSocket(8888);  
-              
-            System.out.println("The server is waiting your input...");  
-              
-            while(true)   
-            {  
-                Socket socket = ss.accept(); 
-                invoke(socket); 
-            }
+            System.setProperty("javax.net.ssl.keyStore", "./cfg/server.jks");  
+            System.setProperty("javax.net.ssl.keyStorePassword", "123456");  
+            System.setProperty("javax.net.ssl.trustStore", "./cfg/client.jks");  
+            System.setProperty("javax.net.ssl.trustStorePassword", "123456");  
+  
+            SSLServerSocketFactory serverSocketFactory = (SSLServerSocketFactory) SSLServerSocketFactory  
+                    .getDefault();  
+            SSLServerSocket serverSocket = (SSLServerSocket) serverSocketFactory  
+                    .createServerSocket(8888);  
+            // 要求客户端身份验证  
+            serverSocket.setNeedClientAuth(true);  
+  
+            while (true) {  
+                SSLSocket socket = (SSLSocket) serverSocket.accept();  
+                Accepter accepter = new Accepter(socket);  
+                accepter.service();  
+            } 
         } catch (IOException e) {  
             e.printStackTrace();  
         }
 	}
-    private void invoke(final Socket socket) throws IOException {  
-        new Thread(new Runnable() {  
-            public void run() {
+    static class Accepter implements Runnable {  
+        private SSLSocket socket;  
+
+        public Accepter(SSLSocket socket) {  
+            this.socket = socket;  
+        }  
+
+        public void service() {  
+            Thread thread = new Thread(this);  
+            thread.start();  
+        }  
+
+        @Override  
+        public void run() {  
+            try {  
             	BufferedReader in = null;
             	BufferedWriter out = null;
                 try {  
@@ -52,15 +70,14 @@ public class Bank {
                     String line = read(socket,in);  
                     if(line.equals("login")) {
                     	String account = read(socket,in);
-                    	System.out.println(account);
+                    	//System.out.println(account);
                     	Statement s = conn.createStatement();
                     	ResultSet rs = s.executeQuery("SELECT * FROM users WHERE account = '"+account + "'");
                     	if(rs.next()){
                         	String pswd = read(socket,in);
-                        	System.out.println(pswd);
+                        	//System.out.println(pswd);
                         	if(pswd.equals(rs.getString(3))) {
                         		send(socket,"success\r\n",out); 
-    							System.out.println("8888");
                         		while(true) 
                         		{
                         			String service = read(socket,in);
@@ -80,7 +97,7 @@ public class Bank {
                             			pstmt.setInt(1, oamt);
                             			pstmt.setString(2,account);
                             			pstmt.executeUpdate();
-                            			send(socket,"success\r\n"+oamt+"\r\n",out); 
+                            			send(socket,oamt+"\r\n",out); 
                             		}
                             		else if(service.equals("withdraw")) {
                             			String answer = read(socket,in);
@@ -96,7 +113,7 @@ public class Bank {
                                 			pstmt.setInt(1, oamt);
                                 			pstmt.setString(2,account);
                                 			pstmt.executeUpdate();
-                            				send(socket,"success\r\n"+oamt+"\r\n",out);                   				
+                            				send(socket,oamt+"\r\n",out);                   				
                             			}
                             			else {
                                     		send(socket,"insufficient\r\n",out); 
@@ -114,19 +131,32 @@ public class Bank {
                             				int tamt = toAcnt.getInt(4);
                             				int oamt = rs.getInt(4);
                             				if(oamt>=amount) {
-                            					oamt -= amount;
-                            					tamt += amount;
-                                    			String osql = "UPDATE users SET amount = ? WHERE account = ?";
-                                    			PreparedStatement opstmt = conn.prepareStatement(osql);
-                                    			opstmt.setInt(1, oamt);
-                                    			opstmt.setString(2,account);
-                                    			opstmt.executeUpdate();
-                                    			String tsql = "UPDATE users SET amount = ? WHERE account = ?";
-                                    			PreparedStatement tpstmt = conn.prepareStatement(tsql);
-                                    			tpstmt.setInt(1, tamt);
-                                    			tpstmt.setString(2,account);
-                                    			tpstmt.executeUpdate();
-                            					send(socket,"success\n"+oamt+"\r\n",out);    
+                            					try { 
+                                					oamt -= amount;
+                                					tamt += amount;
+                                					conn.setAutoCommit(false);
+                                        			String osql = "UPDATE users SET amount = ? WHERE account = ?";
+                                        			PreparedStatement opstmt = conn.prepareStatement(osql);
+                                        			opstmt.setInt(1, oamt);
+                                        			opstmt.setString(2,account);
+                                        			opstmt.executeUpdate();
+                                        			String tsql = "UPDATE users SET amount = ? WHERE account = ?";
+                                        			PreparedStatement tpstmt = conn.prepareStatement(tsql);
+                                        			tpstmt.setInt(1, tamt);
+                                        			tpstmt.setString(2,toAccount);
+                                        			tpstmt.executeUpdate();
+                                        			conn.commit();
+                                        			opstmt.close();
+                                        			tpstmt.close();
+                                					send(socket,oamt+"\r\n",out);                               						
+                            					}catch(SQLException ex){
+                            			            try {
+                            			                conn.rollback();        //回滚事务
+                            			            } catch(SQLException e1) {
+                            			                e1.printStackTrace();
+                            			            }
+                            			            send(socket,"unknownError\r\n",out);
+                            					}
                             				}
                             				else {
                             					send(socket,"insufficient\r\n",out);                     					
@@ -162,15 +192,18 @@ public class Bank {
                     try {  
                         socket.close();  
                     } catch (Exception e) {}  
-                }  
+                }   
+            } catch (Exception e) {  
+                // replace with other code  
+                e.printStackTrace();  
             }  
-        }).start();  
-    }	
+        }  
+    } 
 	public static void main(String[] args) throws Exception{
 		new Bank();  
 	}
 	
-	public String read(Socket socket,BufferedReader in) throws IOException{
+	public static String read(Socket socket,BufferedReader in) throws IOException{
 		try {
 			String line = in.readLine(); 
 			return line;
@@ -180,7 +213,7 @@ public class Bank {
 			return "0";
 		}
 	}
-	public boolean send(Socket socket,String writeTo,BufferedWriter out) throws IOException{
+	public static boolean send(Socket socket,String writeTo,BufferedWriter out) throws IOException{
 		try {
 			out.write(writeTo);
 			out.flush();

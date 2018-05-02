@@ -116,8 +116,18 @@ public class Withdraw extends JFrame {
 				dispose();
 			}
 		});
-		back.setBounds(30, 201, 104, 23);
+		back.setBounds(46, 200, 104, 23);
 		contentPane.add(back);
+		
+		JButton WRECPT = new JButton("\u6253\u5370\u51ED\u6761");
+		WRECPT.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		WRECPT.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 13));
+		WRECPT.setEnabled(false);
+		WRECPT.setBounds(176, 200, 101, 23);
+		contentPane.add(WRECPT);
 	}
 	private String send(Socket socket, String writeTo) throws IOException {
 		try {

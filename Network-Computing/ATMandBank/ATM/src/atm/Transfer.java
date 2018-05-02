@@ -74,7 +74,7 @@ public class Transfer extends JFrame {
 		
 		toAccount = new JTextField();
 		toAccount.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 13));
-		toAccount.setBounds(157, 105, 151, 20);
+		toAccount.setBounds(156, 105, 151, 20);
 		contentPane.add(toAccount);
 		toAccount.setColumns(10);
 		
@@ -121,8 +121,11 @@ public class Transfer extends JFrame {
 						else if(answer.equals("insufficient")) {
 							tips.setText("Óà¶î²»×ã£¡");
 						}
-						else {
+						else if(answer.equals("notFound")){
 							tips.setText("ÕË»§²»´æÔÚ£¡");
+						}
+						else {
+							tips.setText("Î´Öª´íÎó£¬ÒµÎñ»Ø¹ö£¡");
 						}
 					}
 				} catch (Exception e1) {
@@ -133,6 +136,16 @@ public class Transfer extends JFrame {
 		confirm.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 13));
 		confirm.setBounds(296, 210, 101, 23);
 		contentPane.add(confirm);
+		
+		JButton TRECPT = new JButton("\u6253\u5370\u51ED\u6761");
+		TRECPT.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		TRECPT.setFont(new Font("Î¢ÈíÑÅºÚ", Font.PLAIN, 13));
+		TRECPT.setEnabled(false);
+		TRECPT.setBounds(168, 210, 101, 23);
+		contentPane.add(TRECPT);
 	}
 	private String send(Socket socket, String writeTo) throws IOException {
 		try {

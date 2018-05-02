@@ -3,11 +3,15 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import java.awt.Font;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Color;
@@ -19,8 +23,13 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 public class ATM {
 
@@ -37,6 +46,11 @@ public class ATM {
 	private JPanel JTransfer;
 	private JTextField TFtoAccount;
 	private JTextField TFamount;
+	private JPanel JReceipt;
+	private JTextPane JRtextPane;
+	private JDialog JDlg;
+	
+	private String userAccount;
 	
 	BufferedWriter bufferedWriter;
 	BufferedReader bufferedReader;
@@ -107,7 +121,7 @@ public class ATM {
 		login.setFont(new Font("微软雅黑", Font.PLAIN, 13));
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				String userAccount = account.getText();
+				userAccount = account.getText();
 				String userPSW = password.getText();
 				userAccount.trim();
 				userPSW.trim();
@@ -115,9 +129,16 @@ public class ATM {
 					tips.setText("卡号或密码格式不正确！");
 				}
 				else {
-					Socket socket = null;
+					 SSLSocket socket = null;
 					try {
-						socket = new Socket("127.0.0.1",8888);
+				        System.setProperty("javax.net.ssl.keyStore", "./cfg/client.jks");  
+				        System.setProperty("javax.net.ssl.keyStorePassword", "123456");  
+				        System.setProperty("javax.net.ssl.trustStore", "./cfg/server.jks");  
+				        System.setProperty("javax.net.ssl.trustStorePassword", "123456");  
+				        SSLSocketFactory sslsocketfactory = (SSLSocketFactory) SSLSocketFactory  
+				                .getDefault();  
+				        socket = (SSLSocket) sslsocketfactory.createSocket(  
+				                "127.0.0.1", 8888);  
 						bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 						bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					} catch (UnknownHostException e1) {
@@ -140,7 +161,6 @@ public class ATM {
 						}
 						else if(answer.equals("success")){
 							System.out.println(answer);
-							//frmAtm.remove(Jlogin);
 							Jlogin.setVisible(false);
 							Service(socket);
 						}
@@ -159,7 +179,7 @@ public class ATM {
 		frmAtm.setContentPane(Jlogin);
 	}
 	
-	public void Service(Socket socket) {
+	public void Service(SSLSocket socket) {
 		Jservice = new JPanel();
 		Jservice.setBorder(new EmptyBorder(5, 5, 5, 5));
 		Jservice.setLayout(null);
@@ -169,7 +189,6 @@ public class ATM {
 		JButton diposit = new JButton("\u5B58\u6B3E");
 		diposit.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				//frmAtm.remove(Jservice);
 				Jservice.setVisible(false);
 				Diposit(socket);
 			}
@@ -181,7 +200,6 @@ public class ATM {
 		JButton withdraw = new JButton("\u53D6\u6B3E");
 		withdraw.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//frmAtm.remove(Jservice);
 				Jservice.setVisible(false);
 				Withdraw(socket);
 			}
@@ -193,7 +211,6 @@ public class ATM {
 		JButton transfer = new JButton("\u8F6C\u8D26");
 		transfer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//frmAtm.remove(Jservice);
 				Jservice.setVisible(false);
 				Transfer(socket);
 			}
@@ -210,7 +227,6 @@ public class ATM {
 		JButton back = new JButton("\u8FD4\u56DE");
 		back.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//frmAtm.remove(Jservice);
 				Jservice.setVisible(false);
 				initialize();
 			}
@@ -221,7 +237,7 @@ public class ATM {
 		frmAtm.setContentPane(Jservice);
 	}
 	
-	public void Diposit(Socket socket) {
+	public void Diposit(SSLSocket socket) {
 		JDiposit = new JPanel();
 		JDiposit.setBorder(new EmptyBorder(5, 5, 5, 5));
 		JDiposit.setLayout(null);
@@ -266,9 +282,28 @@ public class ATM {
 						String writeTo = "diposit\n" + amts + '\n';
 						send(socket,writeTo);
 						String answer  = read(socket);
-						if(answer.equals("success")) {
-							//answer = read(socket);
+						if(!(answer.equals("failed"))) {
 							tips.setText("成功存入"+amts+"元！");
+							JDlg = new JDialog();
+							JDlg.setVisible(true);
+							Object[] options = {"确认 ","取消 "};       
+						    int response=JOptionPane.showOptionDialog(JDlg, "请问是否需要打印交易凭条？", "打印凭条 ",JOptionPane.YES_OPTION,       
+							    
+							JOptionPane.QUESTION_MESSAGE, null, options, options[0]);     
+							    
+							if(response==0){    
+								JDiposit.setVisible(false);
+								Date date=new Date();  
+				    	        DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS");  
+				    			@SuppressWarnings("static-access")
+								String content = "交易账户："+userAccount+"\r\n"
+				    			+"交易时间："+format.getDateTimeInstance().format(date)+"\r\n"
+				    			+"业务类型：存款\r\n"
+				    			+"账户余额："+answer+"\r\n";
+								Receipt(content);	
+							} else if(response==1){     
+								socket.close();
+							} 
 						}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -294,7 +329,7 @@ public class ATM {
 		frmAtm.setContentPane(JDiposit);
 	}
 	
-	public void Withdraw(Socket socket) {
+	public void Withdraw(SSLSocket socket) {
 		JWithdraw = new JPanel();
 		JWithdraw.setBorder(new EmptyBorder(5, 5, 5, 5));
 		JWithdraw.setLayout(null);
@@ -338,11 +373,31 @@ public class ATM {
 						String writeTo = "withdraw\n" + amts + '\n';
 						send(socket,writeTo);
 						String answer  = read(socket);
-						if(answer.equals("success")) {
-							tips.setText("成功取出"+amts+"元！");
-						}
-						else if(answer.equals("insufficient")) {
+						if(answer.equals("insufficient")) {
 							tips.setText("余额不足！");
+						}
+						else if(!(answer.equals("failed"))) {
+							tips.setText("成功取出"+amts+"元！");
+							JDlg = new JDialog();
+							JDlg.setVisible(true);
+							Object[] options = {"确认 ","取消 "};       
+						    int response=JOptionPane.showOptionDialog(JDlg, "请问是否需要打印交易凭条？", "打印凭条 ",JOptionPane.YES_OPTION,       
+							    
+							JOptionPane.QUESTION_MESSAGE, null, options, options[0]);     
+							    
+							if(response==0){    
+								JDiposit.setVisible(false);
+								Date date=new Date();  
+				    	        DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS");  
+				    			@SuppressWarnings("static-access")
+								String content = "交易账户："+userAccount+"\r\n"
+				    			+"交易时间："+format.getDateTimeInstance().format(date)+"\r\n"
+				    			+"业务类型：取款\r\n"
+				    			+"账户余额："+answer+"\r\n";
+								Receipt(content);
+							} else if(response==1){     
+							    socket.close();
+							} 
 						}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -368,7 +423,7 @@ public class ATM {
 		frmAtm.setContentPane(JWithdraw);
 	}
 	
-	public void Transfer(Socket socket) {
+	public void Transfer(SSLSocket socket) {
 		JTransfer = new JPanel();
 		JTransfer.setBorder(new EmptyBorder(5, 5, 5, 5));
 		JTransfer.setLayout(null);
@@ -436,14 +491,38 @@ public class ATM {
 						String writeTo = "transfer\n" + account + '\n'+amt + '\n';
 						send(socket,writeTo);
 						String answer  = read(socket);
-						if(answer.equals("success")) {
-							tips.setText("成功转账"+amt+"！");
-						}
-						else if(answer.equals("insufficient")) {
+						if(answer.equals("insufficient")) {
 							tips.setText("余额不足！");
 						}
-						else {
+						else if(answer.equals("notFound")) {
 							tips.setText("账户不存在！");
+						}
+						else if(answer.equals("unknownError")) {
+							tips.setText("未知错误，业务回滚！");
+						}
+						else if(!(answer.equals("failed"))) {
+							tips.setText("成功转账"+amt+"！");
+							JDlg = new JDialog();
+							JDlg.setVisible(true);
+							Object[] options = {"确认 ","取消 "};       
+						    int response=JOptionPane.showOptionDialog(JDlg, "请问是否需要打印交易凭条？", "打印凭条 ",JOptionPane.YES_OPTION,       
+							    
+							JOptionPane.QUESTION_MESSAGE, null, options, options[0]);     
+							    
+							if(response==0){    
+								JDiposit.setVisible(false);
+								Date date=new Date();  
+				    	        DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS");  
+				    			@SuppressWarnings("static-access")
+								String content = "交易账户："+userAccount+"\r\n"
+				    			+"交易时间："+format.getDateTimeInstance().format(date)+"\r\n"
+				    			+"业务类型：转账\r\n"
+				    			+"转入账户："+account
+				    			+"账户余额："+answer+"\r\n";
+								Receipt(content);
+							} else if(response==1){     
+								socket.close();
+							} 
 						}
 					}
 				} catch (Exception e1) {
@@ -456,17 +535,32 @@ public class ATM {
 		JTransfer.add(confirm);
 		frmAtm.setContentPane(JTransfer);
 	}
-	public String read(Socket socket) throws IOException{
+	
+	public void Receipt(String content) {		
+		JReceipt = new JPanel();
+		JReceipt.setBorder(new EmptyBorder(5, 5, 5, 5));
+		JReceipt.setLayout(null);
+		JReceipt.setVisible(true);
+		frmAtm.setTitle("ATM-交易凭条");
+		
+		JRtextPane = new JTextPane();
+		JRtextPane.setBounds(10, 11, 414, 239);
+		JReceipt.add(JRtextPane);
+		JRtextPane.setText(content);
+		frmAtm.setContentPane(JReceipt);
+	}
+	
+	public String read(SSLSocket socket) throws IOException{
 		try {
 			String line = bufferedReader.readLine(); 
 			return line;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace(); 
-			return "0";
+			return "failed";
 		}
 	}
-	public boolean send(Socket socket,String writeTo) throws IOException{
+	public boolean send(SSLSocket socket,String writeTo) throws IOException{
 		try {
 			bufferedWriter.write(writeTo);
 			bufferedWriter.flush();
