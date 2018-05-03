@@ -30,12 +30,13 @@ import java.util.Date;
 
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import javax.swing.JPasswordField;
 
 public class ATM {
 
 	private JFrame frmAtm;
 	private JTextField account;
-	private JTextField password;
+	private JPasswordField password;
 	private JLabel tips;
 	private JPanel Jservice;
 	private JPanel Jlogin;
@@ -105,10 +106,9 @@ public class ATM {
 		label_1.setBounds(65, 146, 31, 14);
 		Jlogin.add(label_1);
 		
-		password = new JTextField();
+		password = new JPasswordField();
 		password.setBounds(106, 144, 204, 20);
 		Jlogin.add(password);
-		password.setColumns(10);
 		
 		tips = new JLabel("");
 		tips.setHorizontalAlignment(SwingConstants.CENTER);
@@ -122,7 +122,7 @@ public class ATM {
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				userAccount = account.getText();
-				String userPSW = password.getText();
+				String userPSW = new String(password.getPassword());
 				userAccount.trim();
 				userPSW.trim();
 				if(userAccount.length() <16||userPSW.length()!=6) {
@@ -286,6 +286,8 @@ public class ATM {
 							tips.setText("成功存入"+amts+"元！");
 							JDlg = new JDialog();
 							JDlg.setVisible(true);
+							JDlg.setLocationRelativeTo(frmAtm);
+							JDlg.setFont(new Font("微软雅黑", Font.PLAIN, 13));
 							Object[] options = {"确认 ","取消 "};       
 						    int response=JOptionPane.showOptionDialog(JDlg, "请问是否需要打印交易凭条？", "打印凭条 ",JOptionPane.YES_OPTION,       
 							    
@@ -303,7 +305,8 @@ public class ATM {
 								Receipt(content);	
 							} else if(response==1){     
 								socket.close();
-							} 
+							}
+							JDlg.dispose();
 						}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -380,13 +383,15 @@ public class ATM {
 							tips.setText("成功取出"+amts+"元！");
 							JDlg = new JDialog();
 							JDlg.setVisible(true);
+							JDlg.setLocationRelativeTo(frmAtm);
+							JDlg.setFont(new Font("微软雅黑", Font.PLAIN, 13));
 							Object[] options = {"确认 ","取消 "};       
 						    int response=JOptionPane.showOptionDialog(JDlg, "请问是否需要打印交易凭条？", "打印凭条 ",JOptionPane.YES_OPTION,       
 							    
 							JOptionPane.QUESTION_MESSAGE, null, options, options[0]);     
 							    
 							if(response==0){    
-								JDiposit.setVisible(false);
+								JWithdraw.setVisible(false);
 								Date date=new Date();  
 				    	        DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS");  
 				    			@SuppressWarnings("static-access")
@@ -397,7 +402,8 @@ public class ATM {
 								Receipt(content);
 							} else if(response==1){     
 							    socket.close();
-							} 
+							}
+							JDlg.dispose();
 						}
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
@@ -504,13 +510,15 @@ public class ATM {
 							tips.setText("成功转账"+amt+"！");
 							JDlg = new JDialog();
 							JDlg.setVisible(true);
+							JDlg.setLocationRelativeTo(frmAtm);
+							JDlg.setFont(new Font("微软雅黑", Font.PLAIN, 13));
 							Object[] options = {"确认 ","取消 "};       
 						    int response=JOptionPane.showOptionDialog(JDlg, "请问是否需要打印交易凭条？", "打印凭条 ",JOptionPane.YES_OPTION,       
 							    
 							JOptionPane.QUESTION_MESSAGE, null, options, options[0]);     
 							    
 							if(response==0){    
-								JDiposit.setVisible(false);
+								JTransfer.setVisible(false);
 								Date date=new Date();  
 				    	        DateFormat format=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SS");  
 				    			@SuppressWarnings("static-access")
@@ -520,9 +528,10 @@ public class ATM {
 				    			+"转入账户："+account
 				    			+"账户余额："+answer+"\r\n";
 								Receipt(content);
-							} else if(response==1){     
+							} else if(response==1){
 								socket.close();
-							} 
+							}
+							JDlg.dispose();
 						}
 					}
 				} catch (Exception e1) {
@@ -547,6 +556,7 @@ public class ATM {
 		JRtextPane.setBounds(10, 11, 414, 239);
 		JReceipt.add(JRtextPane);
 		JRtextPane.setText(content);
+		JRtextPane.setEditable(false);
 		frmAtm.setContentPane(JReceipt);
 	}
 	
