@@ -513,7 +513,6 @@ public class ATM {
 							send("close\n");
 							socket.close();
 							tips.setText("成功转账"+amt+"！");
-							Thread.sleep(1000);
 							JDlg = new JDialog();
 							JDlg.setVisible(true);
 							JDlg.setLocationRelativeTo(frmAtm);
@@ -531,7 +530,7 @@ public class ATM {
 								String content = "交易账户："+userAccount+"\r\n"
 				    			+"交易时间："+format.getDateTimeInstance().format(date)+"\r\n"
 				    			+"业务类型：转账\r\n"
-				    			+"转入账户："+account
+				    			+"转入账户："+account+"\r\n"
 				    			+"账户余额："+answer+"\r\n";
 								Receipt(content);
 							}
