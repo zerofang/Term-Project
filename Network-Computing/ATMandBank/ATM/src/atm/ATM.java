@@ -151,7 +151,7 @@ public class ATM {
 					String writeTo = "login\n" + userAccount + '\n' + userPSW+'\n';
 					String answer;
 					try {
-						send(socket,writeTo);
+						send(writeTo);
 						answer = read(socket);
 						if(answer.equals("notFound")) {
 							tips.setText("账户不存在！");
@@ -279,10 +279,10 @@ public class ATM {
 				else {
 					try {
 						String writeTo = "diposit\n" + amts + '\n';
-						send(socket,writeTo);
+						send(writeTo);
 						String answer  = read(socket);
 						if(!(answer.equals("failed"))) {
-							send(socket,"close\n");
+							send("close\n");
 							socket.close();
 							tips.setText("成功存入"+amts+"元！");
 							JDlg = new JDialog();
@@ -375,13 +375,13 @@ public class ATM {
 				else {
 					try {
 						String writeTo = "withdraw\n" + amts + '\n';
-						send(socket,writeTo);
+						send(writeTo);
 						String answer  = read(socket);
 						if(answer.equals("insufficient")) {
 							tips.setText("余额不足！");
 						}
 						else if(!(answer.equals("failed"))) {
-							send(socket,"close\n");
+							send("close\n");
 							socket.close();
 							tips.setText("成功取出"+amts+"元！");
 							JDlg = new JDialog();
@@ -498,7 +498,7 @@ public class ATM {
 					}
 					else {
 						String writeTo = "transfer\n" + account + '\n'+amt + '\n';
-						send(socket,writeTo);
+						send(writeTo);
 						String answer  = read(socket);
 						if(answer.equals("insufficient")) {
 							tips.setText("余额不足！");
@@ -510,7 +510,7 @@ public class ATM {
 							tips.setText("未知错误，业务回滚！");
 						}
 						else if(!(answer.equals("failed"))) {
-							send(socket,"close\n");
+							send("close\n");
 							socket.close();
 							tips.setText("成功转账"+amt+"！");
 							Thread.sleep(1000);
@@ -566,7 +566,9 @@ public class ATM {
 	
 	public String read(SSLSocket socket) throws IOException{
 		try {
+			socket.setSoTimeout(2000);
 			String line = bufferedReader.readLine(); 
+			socket.setSoTimeout(600000);
 			return line;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -574,7 +576,7 @@ public class ATM {
 			return "failed";
 		}
 	}
-	public boolean send(SSLSocket socket,String writeTo) throws IOException{
+	public boolean send(String writeTo) throws IOException{
 		try {
 			bufferedWriter.write(writeTo);
 			bufferedWriter.flush();

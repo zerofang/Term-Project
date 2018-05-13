@@ -86,6 +86,10 @@ public class Bank {
                         				System.out.println("客户端安全退出！");
                         				break;
                         			}
+                        			else if(service.equals("0")) {
+                        				System.out.println("客户端崩溃！");
+                        				break;
+                        			}
                             		if(service.equals("diposit")) {
                             			String answer = read(socket,in);
                             			if(answer.equals("0")) {
@@ -100,6 +104,7 @@ public class Bank {
                             			pstmt.setInt(1, oamt);
                             			pstmt.setString(2,account);
                             			pstmt.executeUpdate();
+                            			//Thread.sleep(3000);
                             			send(socket,oamt+"\r\n",out); 
                             		}
                             		else if(service.equals("withdraw")) {
