@@ -160,7 +160,6 @@ public class ATM {
 							tips.setText("密码错误！");
 						}
 						else if(answer.equals("success")){
-							System.out.println(answer);
 							Jlogin.setVisible(false);
 							Service(socket);
 						}
@@ -283,13 +282,15 @@ public class ATM {
 						send(socket,writeTo);
 						String answer  = read(socket);
 						if(!(answer.equals("failed"))) {
+							send(socket,"close\n");
+							socket.close();
 							tips.setText("成功存入"+amts+"元！");
 							JDlg = new JDialog();
 							JDlg.setVisible(true);
 							JDlg.setLocationRelativeTo(frmAtm);
 							JDlg.setFont(new Font("微软雅黑", Font.PLAIN, 13));
 							Object[] options = {"确认 ","取消 "};       
-						    int response=JOptionPane.showOptionDialog(JDlg, "请问是否需要打印交易凭条？", "打印凭条 ",JOptionPane.YES_OPTION,       
+						    int response=JOptionPane.showOptionDialog(JDlg, "交易成功！请问是否需要打印交易凭条？", "打印凭条 ",JOptionPane.YES_OPTION,       
 							    
 							JOptionPane.QUESTION_MESSAGE, null, options, options[0]);     
 							    
@@ -303,8 +304,8 @@ public class ATM {
 				    			+"业务类型：存款\r\n"
 				    			+"账户余额："+answer+"\r\n";
 								Receipt(content);	
-							} else if(response==1){     
-								socket.close();
+							} else if(response==1){
+								JDlg.dispose();
 							}
 							JDlg.dispose();
 						}
@@ -380,6 +381,8 @@ public class ATM {
 							tips.setText("余额不足！");
 						}
 						else if(!(answer.equals("failed"))) {
+							send(socket,"close\n");
+							socket.close();
 							tips.setText("成功取出"+amts+"元！");
 							JDlg = new JDialog();
 							JDlg.setVisible(true);
@@ -507,7 +510,10 @@ public class ATM {
 							tips.setText("未知错误，业务回滚！");
 						}
 						else if(!(answer.equals("failed"))) {
+							send(socket,"close\n");
+							socket.close();
 							tips.setText("成功转账"+amt+"！");
+							Thread.sleep(1000);
 							JDlg = new JDialog();
 							JDlg.setVisible(true);
 							JDlg.setLocationRelativeTo(frmAtm);
@@ -528,8 +534,6 @@ public class ATM {
 				    			+"转入账户："+account
 				    			+"账户余额："+answer+"\r\n";
 								Receipt(content);
-							} else if(response==1){
-								socket.close();
 							}
 							JDlg.dispose();
 						}

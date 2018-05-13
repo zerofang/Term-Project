@@ -81,12 +81,15 @@ public class Bank {
                         		while(true) 
                         		{
                         			String service = read(socket,in);
-                        			if(service.equals("0")) {
+                        			//System.out.println(service+"\n");
+                        			if(service.equals("close")) {
+                        				System.out.println("客户端安全退出！");
                         				break;
                         			}
                             		if(service.equals("diposit")) {
                             			String answer = read(socket,in);
                             			if(answer.equals("0")) {
+                            				System.out.println("客户端崩溃！");
                             				break;
                             			}
                             			int amount = Integer.parseInt(answer);
@@ -102,6 +105,7 @@ public class Bank {
                             		else if(service.equals("withdraw")) {
                             			String answer = read(socket,in);
                             			if(answer.equals("0")) {
+                            				System.out.println("客户端崩溃！");
                             				break;
                             			}
                             			int amount = Integer.parseInt(answer);
@@ -113,7 +117,8 @@ public class Bank {
                                 			pstmt.setInt(1, oamt);
                                 			pstmt.setString(2,account);
                                 			pstmt.executeUpdate();
-                            				send(socket,oamt+"\r\n",out);                   				
+                            				send(socket,oamt+"\r\n",out);
+                            				
                             			}
                             			else {
                                     		send(socket,"insufficient\r\n",out); 
@@ -122,6 +127,7 @@ public class Bank {
                             		else if(service.equals("transfer")) {
                             			String answer = read(socket,in);
                             			if(answer.equals("0")) {
+                            				System.out.println("客户端崩溃！");
                             				break;
                             			}
                             			String toAccount = answer; 
