@@ -1,2 +1,6 @@
 # Term-Project
-此仓库中的一部分项目是这学期大作业，尚未找老师验收，所以请不要直接取用
+#### 华容道小游戏： https://github.com/zerofang/Term-Project/tree/master/Java/term-project-java
+#### ATM&Bank（C/S模拟ATM取款机）： https://github.com/zerofang/Term-Project/tree/master/Network-Computing/ATMandBank
+#### Linux邮件收发客户端： https://github.com/zerofang/Term-Project/tree/master/Network-Programing
+#### http客户端： https://github.com/zerofang/Term-Project/tree/master/Network-Computing/HTTP-client
+#### Ajax-XML-Database：https://github.com/zerofang/Term-Project/tree/master/Network-Computing/student-management-system
