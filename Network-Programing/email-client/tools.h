@@ -1,7 +1,7 @@
 #include <unistd.h> 
 #ifndef _TOOLS_H_ 
 #define _TOOLS_H_ 
-#define IPSTR_SMTP "220.181.12.12"
+#define IPSTR_SMTP "123.126.97.2"
 #define SOCKET_ERROR -1
 
 char buffer[1024];
@@ -125,21 +125,6 @@ void getNamePasswd(char name[],char passwd[]){
         exit(0);
     }
 }
-
-//设置用户信息
-void setUser(){
-    printf("请输入账号:");
-    char name[100],*passwd;
-    scanf("%s",name);
-    getchar();
-    passwd = getpass("请输入密码:");
-    char* base64_name = base64_encode(name);
-    char* base64_passwd = base64_encode(passwd);
-    FILE* fp = fopen("email.conf","w");
-    fprintf(fp, "%s\n%s",base64_name,base64_passwd);
-    fclose(fp);
-}
-
 
 const char base[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 
@@ -267,5 +252,20 @@ char *base64_decode(const char *data){
     *f = '\0';   
     return ret;   
 } 
+
+//设置用户信息
+void setUser(){
+    printf("请输入账号:");
+    char name[100],*passwd;
+    scanf("%s",name);
+    getchar();
+    passwd = getpass("请输入密码:");
+    char* base64_name = base64_encode(name);
+    char* base64_passwd = base64_encode(passwd);
+    FILE* fp = fopen("email.conf","w");
+    fprintf(fp, "%s\n%s",base64_name,base64_passwd);
+    fclose(fp);
+}
+
 
 #endif

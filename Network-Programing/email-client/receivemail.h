@@ -5,7 +5,7 @@
 char server2[56]="imap.163.com"; 
 int watch_inbox(){
 	//连接服务器,参数，服务器地址，ip地址，端口号
-	if(connectHost(server2,"123.125.50.47",143)<0){
+	if(connectHost(server2,"123.126.97.78",143)<0){
         return -1;
     }
 

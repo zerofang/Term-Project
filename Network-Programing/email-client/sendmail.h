@@ -87,7 +87,7 @@ void send_mail(char* to){
     char c;
     int p = 0;
     char content[6000];
-    while ((c = getchar())!=EOF){
+    while ((c = getchar())!='\n'){
         content[p++] = c;
     }
     content[p] = '\0';
@@ -98,4 +98,5 @@ void send_mail(char* to){
     char* from = base64_decode(name);
     sendmail(name,passwd,from, to, subject, content);
 }
+
 #endif
