@@ -1,8 +1,17 @@
 #include <unistd.h> 
 #ifndef _TOOLS_H_ 
 #define _TOOLS_H_ 
-#define IPSTR_SMTP "123.126.97.2"
 #define SOCKET_ERROR -1
+
+/**SMTP settings**/
+#define SMTP_SERVER "smtp.163.com"
+#define SMTP_IP "123.126.97.2"
+#define SMTP_PORT 25
+
+/**IMAP settings**/
+#define IMAP_SERVER "imap.163.com"
+#define IMAP_IP "123.126.97.78"
+#define IMAP_PORT 143
 
 char buffer[1024];
 int sockfd,ret;

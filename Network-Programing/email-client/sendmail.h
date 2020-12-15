@@ -3,17 +3,17 @@
 #include "tools.h"
 
 char *recv_data;
-char server1[56]="smtp.163.com"; 
+
 char Subject[512];
 char Content[6000]={0};
 char From[128];
 char To[128];
 
-int sendmail(char* name,char* passwd,char* from,char* to,char* subject,char* content){
+int sendmail(char* name, char* passwd, char* from, char* to, char* subject, char* content){
 	//1.连接主机服务器
 	//2.登录
 	//3.发送邮件
-	if(connectHost(server1,IPSTR_SMTP,25)<0){
+	if(connectHost(SMTP_SERVER, SMTP_IP, SMTP_PORT) < 0){
         return -1;
     }
  
