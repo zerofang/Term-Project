@@ -87,8 +87,8 @@ int watch_inbox(){
     	}
     	p = strtok(buffer,"\n");
 		p = strtok(NULL,"\n");
-    	printf("Content:\n%s\n",p);
-    	//printf("Content:\n%s\n",*base64_decode((const char *)p));
+    	//printf("Content:\n%s\n",p);
+    	printf("Content:\n%s\n", base64_decode((const char *)p));
     	printf("-------------------------------------\n");
     }
 	printf("是否删除邮件？[y/n]\n");
